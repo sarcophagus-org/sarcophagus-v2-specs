@@ -14,7 +14,48 @@
 
 ### Overview, Problem Description, Summary, or Abstract
 
-- Summary of the problem (from the perspective of the user), the context, suggested solution, and the stakeholders.
+Sarcophagus is a system that allows for the creation, management, and eventual execution of a digital [Dead Man's Switch](https://en.wikipedia.org/wiki/Dead_man%27s_switch) (DMS), in a decentralized environment.
+
+The format of a DMS in Sarcophagus is quite simple: a user has "data", in the form of a computer file, that they want a recipient to receive, at the moment in time in which the DMS timeout has elapsed. The creator is always able to extend the DMS time, and may do so indefinitely.
+
+In traditional digital Dead Man's Switch systems, a centralized third party is necessary to sit in between the creator and the recipient.
+
+```mermaid
+flowchart LR
+  creator[Creator]
+  central[Centralized Service]
+  recipient[Recipient]
+
+  creator-->central
+  central-->recipient
+```
+
+<sup>traditional Dead Man's Switch system architecture</sup>
+
+The creator gives their file to the centralized service, who keeps it private and secure until the time which it's necessary to release that file to the recipient.
+
+This works fine until the centralized service does what we're expecting it to do. As soon as it goes offline, or the company shuts down, or they're persuaded by the recipient or other 3 letter organizations to give up the data early, the resiliency of the system breaks down.
+
+In contrast, the Sarcophagus DMS system replaces the centralized service with an array of independent, pseudonymous, profit-motivated actors. These actors, in aggregate, provide the same service as the centralized service in our first example, but do so in a way that increases resiliency of the system two-fold
+
+1. No one (or small set) of actors have enough data to do any harm on their own (harm being, releasing, through neglect or coersion, the payload early).
+2. Only a majority of (but not all) actors are necessary in order to provide services at the time of DMS execution (meaning a subset of actors can be offline, but services can still be rendered).
+
+```mermaid
+flowchart LR
+  creator[Creator]
+  sp1[Service Provider 1]
+  sp2[Service Provider 2]
+  sp3[Service Provider 3]
+  sp4[Service Provider 4]
+  sp5[Service Provider 5]
+  recipient[Recipient]
+
+  creator-->sp1 & sp2 & sp3 & sp4 & sp5
+  sp1 & sp2 & sp3 & sp4 & sp5-->recipient
+```
+
+<sup>simplified Sarcophagus Dead Man's Switch system architecture</sup>
 
 ### Glossary or Terminology
 
