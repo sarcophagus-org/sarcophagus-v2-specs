@@ -8,11 +8,10 @@ Head on over to [Discussions](https://github.com/sarcophagus-org/sarcophagus-v2/
 
 2. As the official specifications documentation for Sarcophagus.
 
-We expect that as ideas become more fleshed out and concrete, these discussions and specifications, and the actionable issues that come from them, will spin out into their own discussions and issues in more specific repositories.
+The [System Requirements Specification](./system-requirements-specification.md) is a living document, currently existing as a Markdown document, who's goal is to be the official reference for anyone to grok what Sarcophagus is.
 
-Specifications are currently being created as various diagrams and flowcharts, using the markdown-like [`mermaid`](https://mermaid-js.github.io/mermaid/#/) syntax.
-
-## Features and workflows
+Specifications diagrams and flowcharts are being created using the markdown-like [`mermaid`](https://mermaid-js.github.io/mermaid/#/) syntax.
+### Features and Workflow Diagrams
 
 * [Sarcophagus lifecycle](./sarcophagus-lifecycle.md)
 * [Create Sarcophagus](./create-sarcophagus.md)
