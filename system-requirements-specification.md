@@ -102,6 +102,33 @@ TODO: Would love some help with this section, maybe from @sarcophagusio, @moondo
 - Product requirements in the form of user stories
 - Technical requirements
 
+#### As an Embalmer
+
+1. As an embalmer, I want to see the statistics and reputations of archaeologists, so that I can make educated tradeoff decisions on which archaeologists I use for my Dead Man's Switch instances.
+1. As an embalmer, I want to create a new Dead Man's Switch instance, so that my family gets access to my seed phrase when I die.
+1. As an embalmer, I want to poke my Dead Man's Switch every month, so that my seed phrase isn't accidentally released early.
+1. As an embalmer, I want to effectively "end" a Dead Man's Switch I've previously created, so that the recipient will never get access to the data.
+
+#### As an Archaeologist
+
+1. As an archaeologist, I want to set my own profile variables, including fee limits and resurrection limits, so that I can control my profit margins.
+1. As an archaeologist, I want to be selected for new Dead Man's Switch instances, so that I can make money with my spare hardware.
+1. As an archaeologist, I want to transfer my existing Dead Man's Switch rights & responsibilies, so that I can turn off my hardware for good.
+1. As an archaeologist, I want to submit my Dead Man's Switch instances' private key when that Dead Man's Switch is triggered, so that I can receive the bounty payout and increase my reputation.
+
+#### As an Arweave Archaeologist
+
+1. As an Arweave Archaeologist, I want to help other system participants save data to Arweave, so that I can make extra money.
+
+#### As a Recipient
+
+1. As a recipient, I want to easily know what my Ethereum "public key" is and share it with an embalmer, so that I can be sure that I'll be able to access data on Dead Man's Switches that I'm the recipient of.
+1. As a recipient, I want to know when data is available for me, so that I can get access to the private data an embalmer wanted me to have.
+
+#### As a Third Party
+
+1. As a third party, I want to prove to the system that an archaeologist has misbehaved, so that I can make some extra money.
+
 ### Non-Goals or Out of Scope
 
 - Product and technical requirements that will be disregarded
