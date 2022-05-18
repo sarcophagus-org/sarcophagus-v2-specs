@@ -26,7 +26,7 @@ sequenceDiagram
 
   Note right of New Archaeologist: Includes:<br/>- Updated Encrypted Shard<br/>- Signature from Original Archaeologist<br/>
 
-  Smart Contracts->>Smart Contracts: Verify and Transfer (update encrypted shard and archaeologist)
+  Smart Contracts->>Smart Contracts: Verify and Transfer
 
-  Note right of Smart Contracts: - Transfer NFT to New Archaeologist
+  Note right of Smart Contracts: - Transfer NFT to New Archaeologist <br>- Update encrypted shard <br>- Update archaeologist
 ```
