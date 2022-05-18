@@ -16,35 +16,17 @@ sequenceDiagram
 
   New Archaeologist->>New Archaeologist: Encrypt shard with public key
 
-  loop P2P Networking
-    New Archaeologist->>Arweave Archaeologist: Gossip to find Arweave Archaeologists
+  loop Original Archaeologist Signature
+    New Archaeologist->>Original Archaeologist: Send encrypted shard
 
-    Arweave Archaeologist->>New Archaeologist: Respond with liveliness and profile information
+    Original Archaeologist->>New Archaeologist: Respond with signature of encrypted shard
   end
-
-  New Archaeologist->>New Archaeologist: Selects an Arweave Archaeologist
-
-  New Archaeologist->>Smart Contracts: Signal intent-to-transfer transaction
-
-  Note right of New Archaeologist: Transaction includes:<br/>- payment to Arweave Archaeologist<br/>- ID of that Arweave Archaeologist
-
-  New Archaeologist->>Arweave Archaeologist: Inform of recent transaction
-
-  Arweave Archaeologist-->>Smart Contracts: Verifies transaction
-
-  Note right of Arweave Archaeologist: Confirms that:<br/>- payment is adequate<br/>- payment is for self<br/>- payment hasn't been fulfilled yet
-
-  Arweave Archaeologist->>Arweave: Transaction to store data bundle
-
-  Arweave Archaeologist->> New Archaeologist: Return back Arweave TX ID and Signature
-
-  New Archaeologist->>New Archaeologist: Confirm data in Arweave TX is valid
 
   New Archaeologist->>Smart Contracts: Finalization transaction
 
-  Note right of New Archaeologist: Includes:<br/>- Arweave TX ID<br/>- Signature from New Archaeologist<br/>- Signature from Arweave Archaeologist
+  Note right of New Archaeologist: Includes:<br/>- Updated Encrypted Shard<br/>- Signature from Original Archaeologist<br/>
 
-  Smart Contracts->>Smart Contracts: Verify and Transfer
+  Smart Contracts->>Smart Contracts: Verify and Transfer (update encrypted shard and archaeologist)
 
-  Note right of Smart Contracts: - Pay Arweave Archaeologist their fees<br/>- Transfer NFT to New Archaeologist
+  Note right of Smart Contracts: - Transfer NFT to New Archaeologist
 ```
