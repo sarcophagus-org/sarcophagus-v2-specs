@@ -48,7 +48,7 @@ sequenceDiagram
 
   Embalmer->>Embalmer: Create Arweave data bundle
 
-  Note right of Embalmer: Includes:<br/>- outer encrypted payload<br/>- encrypted private key shards<br/>- hashes of each shard
+  Note right of Embalmer: Includes:<br/>- outer encrypted payload
 
   Embalmer->>Embalmer: Choose Arweave Archaeologist to use
 
@@ -56,7 +56,7 @@ sequenceDiagram
 
   Embalmer->>Smart Contracts: Make first transaction
 
-  Note right of Embalmer:- Creates unique identifier for sarcophagus<br/>- Puts up payment signal for not-yet-completed Arweave transaction<br/>- Puts up payment for first round of wrapping<br/>- Includes identifiers for all archaeologists<br/>- Includes public keys used to encrypt each shard
+  Note right of Embalmer:- Creates unique identifier for sarcophagus<br/>- Puts up payment signal for not-yet-completed Arweave transaction<br/>- Puts up payment for first round of wrapping<br/>- Includes identifiers for all archaeologists<br/>- Includes hashes of each unencrypted shard<br/>- Includes encrypted shards (alternatively, these could be sent to arches to store to avoid storing on contract)
 
   par Embalmer <-> Arweave Archaeologist
     Embalmer->>Arweave Archaeologist: Inform Arweave Archaeologist of recent transaction
