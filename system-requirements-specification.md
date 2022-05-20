@@ -131,7 +131,7 @@ TODO: Would love some help with this section, maybe from @sarcophagusio, @moondo
 ### Future Goals
 
 - Embalmer can change the set of archaeologists when rewrapping a sarcophagus.
-- Launching the system on alternate Layer 1s or Layer 2s.
+- Deploy the contracts on alternate Layer 1s or Layer 2s, and update the archaeologist to be compatible with these alternate networks.
 - Establish a marketplace for sarcophagi to be transferred between archaeologists.
 - Finding alternate ways to get data to arweave without relying on the archaeologist.
 
@@ -144,7 +144,8 @@ TODO: Would love some help with this section, maybe from @sarcophagusio, @moondo
 
 ### Current or Existing Solution / Design
 
-- The current solution and design can be visualized in the diagram below.
+The current solution and design can be visualized in the diagram below.
+
 
 
 1. The embalmer can interact with archaeologists and the contracts through a web application.
