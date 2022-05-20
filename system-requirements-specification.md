@@ -115,10 +115,6 @@ TODO: Would love some help with this section, maybe from @sarcophagusio, @moondo
 1. As an archaeologist, I want to transfer my existing Dead Man's Switch rights & responsibilies, so that I can turn off my hardware for good.
 1. As an archaeologist, I want to submit my Dead Man's Switch instances' private key when that Dead Man's Switch is triggered, so that I can receive the bounty payout and increase my reputation.
 
-#### As an Arweave Archaeologist
-
-1. As an Arweave Archaeologist, I want to help other system participants save data to Arweave, so that I can make extra money.
-
 #### As a Recipient
 
 1. As a recipient, I want to easily know what my Ethereum "public key" is and share it with an embalmer, so that I can be sure that I'll be able to access data on Dead Man's Switches that I'm the recipient of.
@@ -134,17 +130,26 @@ TODO: Would love some help with this section, maybe from @sarcophagusio, @moondo
 
 ### Future Goals
 
-- Product and technical requirements slated for a future time
+- Embalmer can change the set of archaeologists when rewrapping a sarcophagus.
+- Launching the system on alternate Layer 1s or Layer 2s.
+- Establish a marketplace for sarcophagi to be transferred between archaeologists.
+- Finding alternate ways to get data to arweave without relying on the archaeologist.
 
 ### Assumptions
 
-- Conditions and resources that need to be present and accessible for the solution to work as described
+- A robust network of archaeologists needs to be present for this system to work as intended. 
+- Different parties are able to acquire the necessary tokens in order to use the system: ETH, SARCO, AR
 
 ## Solutions
 
 ### Current or Existing Solution / Design
 
-- Current solution description
+- The current solution and design can be visualized in the diagram below.
+
+
+1. The embalmer can interact with archaeologists and the contracts through a web application.
+1. The archaeologist is a service written in Golang that is meant to run on a server and require minimal maintenance.
+
 - Pros and cons of the current solution
 
 ### Suggested or Proposed Solution / Design
