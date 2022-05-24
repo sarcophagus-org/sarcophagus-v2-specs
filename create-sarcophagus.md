@@ -2,7 +2,6 @@
 sequenceDiagram
   participant Embalmer
   participant Archaeologists
-  participant Arweave Archaeologist
   participant Smart Contracts
   participant Arweave
 
@@ -18,14 +17,6 @@ sequenceDiagram
 
       Note left of Archaeologists: Info from blockchain:<br/>- bond amounts<br/>- reputation
     end
-  and Embalmer <-> Arweave Archaeologists
-    Note right of Embalmer: Embalmer is building state of Arweave Archaeologist network
-
-    loop P2P Networking
-      Embalmer->>Arweave Archaeologist: Gossip to find Arweave Archaeologists
-
-      Arweave Archaeologist->>Embalmer: Respond with liveliness and profile information
-    end
   end
 
   Embalmer->>Embalmer: Upload "payload" and recipient's public key
@@ -39,6 +30,8 @@ sequenceDiagram
   Embalmer->>Embalmer: Encrypt inner encrypted payload with public key ("outer encrypted payload")
 
   Embalmer->>Embalmer: Choose set of `m` archaeologists to participate in new sarcophagus
+  
+  Note right of Embalmer: Based on:<br/>- archaeologist rates<br/>- size of bundle<br />- archaeologist metrics
 
   Embalmer->>Embalmer: Use SSSS to create `n` shards of private key
 
@@ -50,37 +43,27 @@ sequenceDiagram
 
   Note right of Embalmer: Includes:<br/>- outer encrypted payload<br/>- encrypted private key shards<br/>- hashes of each shard
 
-  Embalmer->>Embalmer: Choose Arweave Archaeologist to use
-
-  Note right of Embalmer: Based on:<br/>- liveliness of archaeologists<br/>- archaeologist rates<br/>- size of bundle
-
   Embalmer->>Smart Contracts: Make first transaction
 
   Note right of Embalmer:- Creates unique identifier for sarcophagus<br/>- Puts up payment signal for not-yet-completed Arweave transaction<br/>- Puts up payment for first round of wrapping<br/>- Includes identifiers for all archaeologists<br/>- Includes public keys used to encrypt each shard
 
-  par Embalmer <-> Arweave Archaeologist
-    Embalmer->>Arweave Archaeologist: Inform Arweave Archaeologist of recent transaction
-
-    Arweave Archaeologist-->>Smart Contracts: Verifies transaction
-
-    Note right of Arweave Archaeologist: Confirms that:<br/>- payment is adequate<br/>- payment is for self<br/>- payment hasn't been fulfilled yet
-
-    Arweave Archaeologist->>Arweave: Transaction to store data bundle
-
-    Arweave Archaeologist->>Embalmer: Return back Arweave TX ID and Signature
-
-    Embalmer->>Embalmer: Confirm data in Arweave TX is valid
-  and Embalmer <-> Archaeologists
+  par Embalmer <-> Archaeologists
     Embalmer->>Archaeologists: Inform Archaeologists of recent transaction
 
     Archaeologists-->>Smart Contracts: Verifies transaction
 
-    Note right of Archaeologists: Confirms that:<br/>- their payments are correct
+    Note right of Archaeologists: Confirms that:<br/>- their payments are correct<br/>
+    
+    Archaeologists->>Arweave: Transaction to store data bundle
 
-    Archaeologists->>Embalmer: Signatures of Sarcophagus ID
+    Archaeologists->>Embalmer: Signatures of Sarcophagus ID, Arweave TX ID
+    
+    Embalmer->>Embalmer: Confirm data in Arweave TX is valid
   end
 
   Embalmer->>Smart Contracts: Second transaction, which finalizes Sarcophagus creation
 
   Note right of Embalmer: Includes:<br/>- signatures from archaeologists<br/>- reference to Sarcophagus<br/>- Arweave TX ID
+  
+  Smart Contracts->>Smart Contracts: Lock up archaeologists' free bond
 ```
