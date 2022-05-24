@@ -39,7 +39,7 @@ sequenceDiagram
 
   Embalmer->>Smart Contracts: Make first transaction
 
-  Note right of Embalmer:- Creates unique identifier for sarcophagus<br/>- Puts up payment signal for not-yet-completed Arweave transaction<br/>- Puts up payment for first round of wrapping<br/>- Includes identifier for selected archaeologist
+  Note right of Embalmer:- Creates unique identifier for sarcophagus<br/>- Puts up payment signal for not-yet-completed Arweave transaction<br/>- Puts up payment for first round of wrapping<br/>- Includes identifier for selected archaeologist<br/>- Lock up archaeologist's bond
 
   par Embalmer <-> Archaeologists
     Embalmer->>Archaeologists: Inform Archaeologist of recent transaction
@@ -59,5 +59,5 @@ sequenceDiagram
 
   Embalmer->>Smart Contracts: Second transaction, which finalizes Sarcophagus creation
 
-  Note right of Embalmer: Includes:<br/>- signature from archaeologist<br/>- reference to Sarcophagus<br/>- Arweave TX ID <br/>- Archaeologist public key
+  Note right of Embalmer: Includes:<br/>- signature from archaeologist<br/>- reference to Sarcophagus<br/>- Arweave TX ID <br/>- Archaeologist public key <br/>- Store archaeologist's current public key
 ```
