@@ -142,11 +142,12 @@ TODO: Would love some help with this section, maybe from @sarcophagusio, @moondo
 ### Current or Existing Solution / Design
 
 The current solution can be visualized in the diagrams below.
-[Create Sarcophagus](v1/create-sarcophagus.md)
-[Rewrap Sarcophagus](v1/rewrap-sarcophagus.md)
-[Unwrap Sarcophagus](v1/unwrap-sarcophagus.md)
-[Exhume Sarcophagus](v1/exhume-sarcophagus.md)
-[Register Archaeologist](v1/register-archaeologist.md)
+
+[Create Sarcophagus](v1/create-sarcophagus.md)<br/>
+[Rewrap Sarcophagus](v1/rewrap-sarcophagus.md)<br/>
+[Unwrap Sarcophagus](v1/unwrap-sarcophagus.md)<br/>
+[Exhume Sarcophagus](v1/exhume-sarcophagus.md)<br/>
+[Register Archaeologist](v1/register-archaeologist.md)<br/>
 [Accuse Archaeologist](v1/accuse-archaeologist.md)
 
 #### Current System Notes
@@ -179,13 +180,13 @@ The current solution can be visualized in the diagrams below.
 
 ### Proposed Solution / Design
 
-The new design can be visualized in the diagrams below
-[Sarcophagus Lifecycle](sarcophagus-lifecycle.md)
-[Create Sarcophagus](create-sarcophagus.md)
-[Rewrap Sarcophagus](rewrap-sarcophagus.md)
-[Unwrap Sarcophagus](unwrap-sarcophagus.md)
-[Exhume Sarcophagus](exhume-sarcophagus.md)
-[Transfer Archaeologist R&R](transfer-sarcophagus-rights-and-responsibilities.md)
+The new design can be visualized in the diagrams below<br/><br/>
+[Sarcophagus Lifecycle](sarcophagus-lifecycle.md)<br/>
+[Create Sarcophagus](create-sarcophagus.md)<br/>
+[Rewrap Sarcophagus](rewrap-sarcophagus.md)<br/>
+[Unwrap Sarcophagus](unwrap-sarcophagus.md)<br/>
+[Exhume Sarcophagus](exhume-sarcophagus.md)<br/>
+[Transfer Archaeologist R&R](transfer-sarcophagus-rights-and-responsibilities.md)<br/>
 [Accuse Archaeologist](accuse-archaeologist.md)
 
 #### Proposed solution updates
@@ -227,12 +228,12 @@ There will need to be a way for archaeologists to view sarcophagi available for 
 1. Once a Sarcophagus is created, the digging fees and bounty will be "locked" for the duration of the Sarcophagus
 - Previously, an archaeologist could change their fees between re-wrappings. This is not ideal, as the archaeologist could spike their fees between rewrappings, leading to the embalmer not wanting to rewrap
 
-**Sarcophagus NFT**
-One update that is being considered, pending extra research:
+**Sarcophagus NFT**<br/><br/>
+An update that is being considered, pending extra research:
 1. Each sarcophagus can have NFTs minted for each archaeologist assigned to the sarcophagus.
 1. The owner of this NFT will be the address that is paid for performing archaeologist duties (digging fees & bounty).
 
-**Web Application**
+**Web Application**<br/><br/>
 The web application will have upgraded functionality on the front-end:
 1. Ability to select multiple archaeologists
 2. Updated arweave upload functionality to support retries
@@ -370,12 +371,14 @@ The order in which pieces of the new system will be completed:
 The following items require some research and discussion:
 
 1. Using unencrypted shard hashes / unencrypted shards for sarcophagus creation and unwrapping
-**Pros:**
-- Reduces complexity by removing need for archaeologist to have separate key pairs for each sarcophagus 
-- Avoid archaeologists being paid their bounty despite potentially uploading an incorrect encrypted shard
 
-**Cons**
-- Potentially more expensive
+- Pros:
+  - Reduces complexity by removing need for archaeologist to have separate key pairs for each sarcophagus 
+  - Avoid archaeologists being paid their bounty despite potentially uploading an incorrect encrypted shard
+
+
+- Cons:
+  - Potentially more expensive
 
 2. Archaeologist Arweave upload
 - It needs to be determined how the data bundle gets uploaded to arweave.
@@ -383,7 +386,6 @@ The following items require some research and discussion:
 
 3. Determining M of N archaeologist limit
 - It needs to be decided what the limits of "N" will be (number of archaeologists on a sarcophagus)
-- Need to decide whether
 
 ## End Matter
 
