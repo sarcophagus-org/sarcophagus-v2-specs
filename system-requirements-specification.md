@@ -294,10 +294,10 @@ The web application will have alerts built in, most likely using a 3rd party too
 
 ### Release / Roll-out and Deployment Plan
 
-1. Like in the current implementation, there will both testnet and mainnet versions of the system. 
+1. Like in the current implementation, there will both testnet and mainnet versions of the system.
 1. As previously described in the Testing Plan, there will be a beta testing phase on testnet, after which a mainnet version of the system will be deployed.
-1. The contracts will be upgradable, so in the event the contracts did need to be upgraded, there is an avenue for that to occur.
-1. All 3 code bases (web application, archaeologist service, smart contracts) will use tagged releases to indicate the deployment version. 
+1. The contracts will be upgradable, so in the event the contracts did need to be upgraded, there is an avenue for that to occur. As in V1, the Sarcophagus DAO will be set as the initial owner of all Sarcophagus contracts.
+1. All 3 code bases (web application, archaeologist service, smart contracts) will use tagged releases to indicate the deployment version.
 
 Any core changes to the archaeologist service will result in an alert to the community so that archaeologist operators are aware there is a new release. Automated discord alerts can be setup for this.
 
