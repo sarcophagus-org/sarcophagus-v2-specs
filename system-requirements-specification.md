@@ -84,7 +84,7 @@ flowchart LR
 | inner layer                           | The first layer of encryption that a payload undergoes, using the recipient's public key as the encryption key.                                                                                                    |
 | outer layer                           | The second layer of encryption that a payload (at this point, already encrypted once) undergoes, using a freshly created public key (by the embalmer). The resulting blob of this encryption is stored on Arweave. |
 | double hash                           | The hash of the hash of the inner layer blob.             
-| exhume                                | The process of decrypting both layers of the sarcophagus to retrieve the payload (done by the recipient)    |
+| resurrection                          | The process of decrypting both layers of the sarcophagus to retrieve the payload (done by the recipient)    |
 
 ### Context or Background
 
@@ -146,37 +146,40 @@ The current solution can be visualized in the diagrams below.
 [Create Sarcophagus](v1/create-sarcophagus.md)<br/>
 [Rewrap Sarcophagus](v1/rewrap-sarcophagus.md)<br/>
 [Unwrap Sarcophagus](v1/unwrap-sarcophagus.md)<br/>
-[Exhume Sarcophagus](v1/exhume-sarcophagus.md)<br/>
+[Resurrect Sarcophagus](v1/resurrect-sarcophagus.md)<br/>
 [Register Archaeologist](v1/register-archaeologist.md)<br/>
 [Accuse Archaeologist](v1/accuse-archaeologist.md)
+
+#### Current System Overview
+Please see the [V1 litepaper](https://sarcophagus.io/assets/pdf/sarcophagus_litepaper_v0.2.pdf) for overview of v1.
 
 #### Current System Notes
 
 1. The [Sarcophagus Lifecycle](sarcophagus-lifecycle.md) diagram is relevant for both current solution and the proposed new design.
 2. The embalmer can interact with archaeologists and the contracts through a web application. This web application is not required for interaction, but provides a user interface to do so.
-3. The archaeologist is a service that is intended to run on a server on "auto-pilot" and require minimal maintenance.
+3. The archaeologist is a service that is intended to run on a server and require minimal maintenance.
 4. Archaeologists are incentivized to complete their duties through the following mechanisms:
-- Every time a rewrap occurs on a sarcophagus, the archaeologist will receive payment in the form of digging fees
-- When an archaeologist performs an unwrapping on a sarcophagus, they receive payment in the form of a bounty
-- The archaeologist must post free bond in form of SARCO in order to be assigned to sarcophagi. 
-- When an archaeologist is assigned to a sarcophagi, a portion of their free bond (equal to the digging fees + bounty) become "cursed". They must have at minimum this amount of SARCO in free bond in order to be assigned to the sarcophagus.
-- If the archaeologist fails to complete their duties and unwrap the sarcophagus, this cursed bond will remain locked. If a third party calls "clean sarcophagus", the cursed bond will be distributed between embalmer and third party
-- If a third party successfully accuses an Archaeologist on a sarcophagus, the cursed bond will be distributed between embalmer and third party
-5. Archaeologists have reputation metrics stored on the smart contracts:
-- number of successful unwraps
-- number of times successfully accused
-- number of unsuccessful unwraps ("cleaned sarcophagi")
-- number of sarcophagi cancels
+    - Every time a rewrap occurs on a sarcophagus, the archaeologist will receive payment in the form of digging fees
+    - When an archaeologist performs an unwrapping on a sarcophagus, they receive payment in the form of a bounty
+    - The archaeologist must post free bond in form of SARCO in order to be assigned to sarcophagi. 
+    - When an archaeologist is assigned to a sarcophagi, a portion of their free bond (equal to the digging fees + bounty) become "cursed". They must have at minimum this amount of SARCO in free bond in order to be assigned to the sarcophagus.
+    - If the archaeologist fails to complete their duties and unwrap the sarcophagus, this cursed bond will remain locked. If a third party calls "clean sarcophagus", the cursed bond will be distributed between embalmer and third party
+    - If a third party successfully accuses an Archaeologist on a sarcophagus, the cursed bond will be distributed between embalmer and third party
+5. Archaeologists have reputation metrics stored on-chain:
+    - number of successful unwraps
+    - number of times successfully accused
+    - number of unsuccessful unwraps ("cleaned sarcophagi")
+    - number of sarcophagi cancels
 
 #### Current solution pros/cons
 
 **Pros**
-- The current solution solves the core problem. The lifecycle of a sarcophagus works as intended provided the archaeologist does their job.
+- The current solution solves the core problem -- the lifecycle of a sarcophagus works as intended provided the archaeologist does their job (and there are archaeologists available to perform jobs).
 
 **Cons**
 - The current solution has a single point of failure for any sarcophagus -- the archaeologist selected for the sarcophagus.
-- The archaeologist service is time consuming and complicated to setup and requires an HTTP server to work.
-- An archaeologist can change their bounty + digging fees for a sarcophagus *after* a sarcophagus has been created.
+- The archaeologist service is time-consuming and complicated to setup, and requires an HTTP server for communication with embalmers.
+- An archaeologist can change their bounty + digging fees for a sarcophagus *after* a sarcophagus has been created. This can result in a sarcophagus becoming too expensive to rewrap for an embalmer.
 
 ### Proposed Solution / Design
 
@@ -185,32 +188,36 @@ The new design can be visualized in the diagrams below<br/><br/>
 [Create Sarcophagus](create-sarcophagus.md)<br/>
 [Rewrap Sarcophagus](rewrap-sarcophagus.md)<br/>
 [Unwrap Sarcophagus](unwrap-sarcophagus.md)<br/>
-[Exhume Sarcophagus](exhume-sarcophagus.md)<br/>
+[Resurrect Sarcophagus](resurrect-sarcophagus.md)<br/>
 [Transfer Archaeologist R&R](transfer-sarcophagus-rights-and-responsibilities.md)<br/>
 [Accuse Archaeologist](accuse-archaeologist.md)
 
-#### Proposed solution updates
+#### Proposed Solution Overview
+**Mummification Phase**
+1. The initial setup of mummification will remain the same as v1 -- the embalmer will select a payload and use the recipient's public key to encrypt the payload.
+2. Instead of using the archaeologist's public key to 
 
+#### Proposed solution updates
 The new proposed solution adds a few core functionality updates which are described below.
 
 **Multiple Archaeologists per Sarcophagus**
 1. To avoid having an archaeologist be a single point of failure for any given sarcophagus, multiple archaeologists need to be assigned per sarcophagus.
 1. In order to accommodate this change, the following updates are made:
-- The embalmer will now generate the key pair used for encrypting/decrypting the outer layer
-- SSS will be used to split up the embalmer's private key
-- The number of SSS shards will be determined by how many archaeologists are assigned to the sarcophagus
-- For each archaeologist, their public key will be used to encrypt one of the shards that make up the embalmer's private key
-- The archaeologists' private keys will be stored on-chain at the time of unwrapping, and can then be used to reconstruct the embalmer's private key from the encrypted shards
-3. Some extra data will be stored on arweave in addition to the payload --- the encrypted shards and the unencrypted shard hashes (used to validate unencrypted shards)
-4. The number of shards needed to recreate the secret (private key) in SSS is `m of n`. For example, this could be 3 of 5, meaning the embalmer could require 3 of 5 archaeologists must successfully unwrap for the secret to be reconstructed.
+    - The embalmer will now generate the key pair used for encrypting/decrypting the outer layer
+    - SSS will be used to split up the embalmer's private key
+    - The number of SSS shards will be determined by how many archaeologists are assigned to the sarcophagus
+    - For each archaeologist, their public key will be used to encrypt one of the shards that make up the embalmer's private key
+    - The archaeologists' private keys will be stored on-chain at the time of unwrapping, and can then be used to reconstruct the embalmer's private key from the encrypted shards
+1. Some extra data will be stored on arweave in addition to the payload --- the encrypted shards and the unencrypted shard hashes (used to validate unencrypted shards)
+1. The number of shards needed to recreate the secret (private key) in SSS is `m of n`. For example, this could be 3 of 5, meaning the embalmer could require 3 of 5 archaeologists must successfully unwrap for the secret to be reconstructed.
 
-By implementing the above steps, no single archaeologist will be responsible for a sarcophagus failing to be exhumed b/c an archaeologist has not successfully done their unwrapping responsibility. _Note: unless `m = n` for the `m of n` required to reconstruct the secret._
+By implementing the above steps, no single archaeologist will be responsible for a sarcophagus failing to be resurrected b/c an archaeologist has not successfully done their unwrapping responsibility. _Note: unless `m = n` for the `m of n` required to reconstruct the secret._
 
-This will increase the likelihood a sarcophagus can be exhumed once an embalmer has failed to attest.
+This will increase the likelihood a sarcophagus can be resurrected once an embalmer has failed to attest.
 
 **Transfer Archaeologist Rights and Responsibilities**
 1. If an archaeologist wants/needs to shut down their service, they should be able to transfer their R&R for any sarcophagi they are assigned to
-2. By allowing these transfers, this will increase the likelihood a sarcophagus can be exhumed even if the original archaeologist cannot fulfill their duties on a sarcophagus
+1. By allowing these transfers, this will increase the likelihood a sarcophagus can be resurrected even if the original archaeologist cannot fulfill their duties on a sarcophagus
 
 Reference this [diagram](transfer-sarcophagus-rights-and-responsibilities.md) to understand mechanisms of this update. 
 
@@ -218,26 +225,44 @@ There will need to be a way for archaeologists to view sarcophagi available for 
 
 **Archaeologist Service Upgrades**
 1. The new service will be written in NodeJS, as the JS ecosystem has robust tooling and a large set of developers.
-2. Archaeologists will no longer use http for communication, and will instead be using a peer-to-peer network. [libp2p](https://libp2p.io) (specifically the javascript implementation), is the framework chosen for implementing the p2p network
-- Any communication that happens between embalmers->archaeologists or archaeologists->archaeologists will take place over libp2p.
-- This will allow for simpler setup of the archaeologist service, since no http server or domain will be required
-3. The setup of the archaeologist service will be streamlined and automated
-- The process should be simplified to lower the barrier to entry for archaeologists to join the network
+1. Archaeologists will no longer use http for communication, and will instead be using a peer-to-peer network. [libp2p](https://libp2p.io) (specifically the javascript implementation), is the framework chosen for implementing the p2p network
+    - Any communication that happens between embalmers->archaeologists or archaeologists->archaeologists will take place over libp2p.
+    - This will allow for simpler setup of the archaeologist service, since no http server or domain will be required
+1. The setup of the archaeologist service will be streamlined and automated
+    - The process should be simplified to lower the barrier to entry for archaeologists to join the network
 
 **Static Archaeologist Fees per Sarcophagus**
 1. Once a Sarcophagus is created, the digging fees and bounty will be "locked" for the duration of the Sarcophagus
-- Previously, an archaeologist could change their fees between re-wrappings. This is not ideal, as the archaeologist could spike their fees between rewrappings, leading to the embalmer not wanting to rewrap
+    - Previously, an archaeologist could change their fees between re-wrappings. This is not ideal, as the archaeologist could spike their fees between rewrappings, leading to the embalmer not wanting to rewrap
 
 **Sarcophagus NFT**<br/><br/>
-An update that is being considered, pending extra research:
-1. Each sarcophagus can have NFTs minted for each archaeologist assigned to the sarcophagus.
+An archaeologist's R&R for a sarcophagus can be represented by an NFT. This NFT could be viewed/displayed by the archaeologist along with various relevant data, such as:
+- Resurrection time
+- Fees accrued by the archaeologist on the sarcophagus to date
+
+The only potential downside of adding this NFT would be the minting costs associated.
+
+_Notes_
+1. Each sarcophagus would have NFTs minted for each archaeologist assigned to the sarcophagus.
 1. The owner of this NFT will be the address that is paid for performing archaeologist duties (digging fees & bounty).
+1. This NFT would be transferred during the R&R transfer process.
+
 
 **Web Application**<br/><br/>
 The web application will have upgraded functionality on the front-end:
 1. Ability to select multiple archaeologists
-2. Updated arweave upload functionality to support retries
-3. Various other improvements / bug fixes
+1. Updated arweave upload functionality to support retries
+1. Various other improvements / bug fixes
+
+The web application's mummification process can be improved:
+- Instead of using a long vertical form, another option would be to present the form in a linear step-by-step fashion, where only one step is presented to the user.
+- This would allow the use of larger fonts and more verbose descriptions, leading to an easier-to-understand and smoother UX for embalmers.
+
+In v1, if an arweave upload fails (due to transaction fees being too low or otherwise), the embalmer would have to cancel (or abandon) the sarcophagus.
+In v2, embalmers will be able to retry the arweave upload. This should result in a larger percentage of successful mummifications. 
+
+In v1, sarcophagi for embalmers in the web app are organized based on their state on-chain (pending / completed / cancelled / etc).
+In v2, The web app can potentially take advantage of local storage and allow embalmers to further organize their sarcophagi. For example, they may want to archive any cancelled sarcophagi.
 
 ### Test Plan
 
@@ -246,18 +271,18 @@ There are 3 participants in the system which need to have test plans.
 Below is a list of these participants, and a general outline of test plans for each.
 
 1. Embalmer (represented by a web application)
-- This will rely mostly on manual testing.
-- This will be done by developers during the development of the web application.
-- Any developers in the greater community will also be invited to help with testing during the development process.
-- Once the web application is ready for beta testing, the community will be involved with testing the beta application, which will be launched on an ethereum testnet.
+    - This will rely mostly on manual testing.
+    - This will be done by developers during the development of the web application.
+    - Any developers in the greater community will also be invited to help with testing during the development process.
+    - Once the web application is ready for beta testing, the community will be involved with testing the beta application, which will be launched on an ethereum testnet.
 
-2. Archaeologist (represented by a NodeJS service)
-- There will be an automated test-suite to test the service
-- There will be a beta-testing phase where the community can beta-test the service and leave feedback
+1. Archaeologist (represented by a NodeJS service)
+    - There will be an automated test-suite to test the service
+    - There will be a beta-testing phase where the community can beta-test the service and leave feedback
 
 3. Smart Contracts (deployed on ethereum)
-- There will be an automated test suite to test the contracts
-- There will be a beta-testing phase where the community can beta-test the contracts and leave feedback.
+    - There will be an automated test suite to test the contracts
+    - There will be a beta-testing phase where the community can beta-test the contracts and leave feedback.
 
 There will be a testing->feedback->testing cycle for the beta testing phase. Feedback/bugs will be collected and then implemented/fixed. Once implementation has been completed, a new round of beta testing will begin.
 
@@ -269,10 +294,10 @@ The web application will have alerts built in, most likely using a 3rd party too
 
 ### Release / Roll-out and Deployment Plan
 
-1. Like in the current implementation, there will both testnet and mainnet versions of the system. 
-2. As previously described in the Testing Plan, there will be a beta testing phase on testnet, after which a mainnet version of the system will be deployed.
-3. The contracts will be upgradable, so in the event the contracts did need to be upgraded, there is an avenue for that to occur. As in V1, the Sarcophagus DAO will be set as the initial owner of all Sarcophagus contracts.
-4. All 3 code bases (web application, archaeologist service, smart contracts) will use tagged releases to indicate the deployment version. 
+1. Like in the current implementation, there will both testnet and mainnet versions of the system.
+1. As previously described in the Testing Plan, there will be a beta testing phase on testnet, after which a mainnet version of the system will be deployed.
+1. The contracts will be upgradable, so in the event the contracts did need to be upgraded, there is an avenue for that to occur. As in V1, the Sarcophagus DAO will be set as the initial owner of all Sarcophagus contracts.
+1. All 3 code bases (web application, archaeologist service, smart contracts) will use tagged releases to indicate the deployment version.
 
 Any core changes to the archaeologist service will result in an alert to the community so that archaeologist operators are aware there is a new release. Automated discord alerts can be setup for this.
 
@@ -301,8 +326,8 @@ The transaction fees will be variable depending on gas prices at the time that t
 
 Transaction estimates for different transactions (and different gas prices) will be posted for the community once the smart contracts have been completed. An example of a few transactions that incur costs in the system (this is not comprehensive, view the system diagrams to see all transactions):
 1. Creating a sarcophagus (both embalmer and archaeologist participate)
-2. Rewrapping a sarcophagus (embalmer)
-3. Adding free bond (archaeologist)
+1. Rewrapping a sarcophagus (embalmer)
+1. Adding free bond (archaeologist)
 
 The hardware for running an archaeologist service should be very low (minimal hardware requirements). For example -- Digital Ocean's $4/month entry-level droplet would be more than enough firepower to run the service.
 
@@ -341,8 +366,8 @@ All code for this project is open-source. Anyone can deploy their own version of
 ### Support considerations
 
 1. When the new version of the system is launched, comprehensive instructions will be released with it. This is meant to educate the community and avoid confusion and unnecessary support requests.
-2. There is an active discord server where support requests and bugs can be reported. Any active dev, whether core contributor or member of sarcophagus community can verify the issue and respond.
-3. Any issue determined to be a bug in the code can have an issue created on github in the relevant repository. A process will be put in place to address these issues.
+1. There is an active discord server where support requests and bugs can be reported. Any active dev, whether core contributor or member of sarcophagus community can verify the issue and respond.
+1. Any issue determined to be a bug in the code can have an issue created on github in the relevant repository. A process will be put in place to address these issues.
 
 ## Success Evaluation
 
@@ -350,8 +375,8 @@ All code for this project is open-source. Anyone can deploy their own version of
 
 Some metrics to capture will be:
 1. Average amount of time it takes to setup a new archaeologist
-2. Number of archaeologists joining the network at a given interval (week / month / etc)
-3. Number of successful Sarcophagi being created (vs. number of sarcophagi that have error during creation)
+1. Number of archaeologists joining the network at a given interval (week / month / etc)
+1. Number of successful Sarcophagi being created (vs. number of sarcophagi that have error during creation)
 
 There will be further work on success metrics as the v2 launch gets closer.
 
@@ -361,8 +386,8 @@ There will be further work on success metrics as the v2 launch gets closer.
 
 The order in which pieces of the new system will be completed:
 1. Smart Contracts
-2. Archaeologist Service
-3. Web Application
+1. Archaeologist Service
+1. Web Application
 
 ## Deliberation
 
@@ -373,24 +398,29 @@ The following items require some research and discussion:
 1. Using unencrypted shard hashes / unencrypted shards for sarcophagus creation and unwrapping
 
 - Pros:
-  - Reduces complexity by removing need for archaeologist to have separate key pairs for each sarcophagus 
-  - Avoid archaeologists being paid their bounty despite potentially uploading an incorrect encrypted shard
-
-
+    - Reduces complexity by removing need for archaeologist to have separate key pairs for each sarcophagus 
+    - Avoid archaeologists being paid their bounty despite potentially uploading an incorrect encrypted shard
+    
 - Cons:
-  - Potentially more expensive
+    - Potentially more expensive
 
-2. Archaeologist Arweave upload
-- It needs to be determined how the data bundle gets uploaded to arweave.
-- Either a single archaeologist could be selected to upload the data bundle, or 5 separate bundles could be uploaded (split the data bundle between the archaeologists)
+1. Archaeologist Arweave upload
+    - It needs to be determined how the data bundle gets uploaded to arweave.
+    - Either a single archaeologist could be selected to upload the data bundle, or 5 separate bundles could be uploaded (split the data bundle between the archaeologists)
 
-3. Determining M of N archaeologist limit
-- It needs to be decided what the limits of "N" will be (number of archaeologists on a sarcophagus)
+1. Determining M of N archaeologist limit
+    - It needs to be decided what the limits of "N" will be (number of archaeologists on a sarcophagus)
 
 ## End Matter
 
 ### References
 
+**Github**<br>
 [https://github.com/sarcophagus-org](https://github.com/sarcophagus-org)
+
+**V1 Litepaper**<br>
+[https://sarcophagus.io/assets/pdf/sarcophagus_litepaper_v0.2.pdf](https://sarcophagus.io/assets/pdf/sarcophagus_litepaper_v0.2.pdf)
+
+**Website**<br>
 [https://sarcophagus.io/](https://sarcophagus.io)
 
