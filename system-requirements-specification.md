@@ -194,10 +194,86 @@ The new design can be visualized in the diagrams below<br/><br/>
 
 #### Proposed Solution Overview
 **Mummification Phase**
-1. The initial setup of mummification will remain the same as v1 -- the embalmer will select a payload and use the recipient's public key to encrypt the payload.
-2. Instead of using the archaeologist's public key to 
+1. The initial setup of mummification will remain the same as v1:
+   - The embalmer will select a payload and use the recipient's public key to encrypt the payload (create the inner layer).
+   - The double hash will be generated, to be used as the sarcophagus ID.
+   - The embalmer will select a resurrection time.
+2. Instead of using the archaeologist's public key to create the outer layer, the embalmer will:
+    - Generate a new private / public key pair.
+    - Encrypt the inner layer with the public key from this key pair.
+3. SSS will be used to shard the private key from the key pair generated in step 2.
+   - The embalmer must indicate both `m` and `n`, where:
+     - `n`: How many total archaeologists will participate in the sarcophagus.
+     - `m`: How many archaeologists are necessary to successfully reveal the secret (the private key).
+   - The embalmer will use public keys from each participating archaeologist to encrypt the `n` private key shards.
+4. To retrieve the archaeologists' public keys in step 3, as well as other archaeologist communication, the embalmer will use libp2p (see next _Proposed solution notes_ section below for more details).
+5. After the embalmer has encrypted each private key shard, an arweave data bundle will be prepared, including:
+   - The double-encrypted payload
+   - The encrypted private key shards
+     - Each shard will have metadata indicating which archaeologist the shard maps to.
+   - The hash of each unencrypted shard.
+6. The embalmer will create a transaction to initialize the sarcophagus, including:
+   - Payment for the sarcophagus (bounty / digging fees).
+     - Payment for each archaeologist will be included (as there will be `n` participating archaeologists).
+     - The archaeologists will provide their payment info to the embalmer using libp2p.
+   - Payment for upcoming arweave TX.
+   - Participating archaeologists' public keys.
+   - Participating archaeologists' addresses.
+7. Once the TX in previous step is successful, the embalmer will send each archaeologist the TX ID (and potentially other participating archaeologist identifiers).
+   - Each archaeologist will confirm that the payment posted is sufficient.
+   - Either one or all of the participating archaeologists will be responsible for uploading this data bundle to arweave (this is TBD) and sending this arweave TX ID(s) to the embalmer.
+   - Each archaeologist will send a signature to the embalmer (signalling that they accept the R&R for this sarcophagus)
+8. The embalmer validates the data bundle uploaded to arweave is correct.
+9. The embalmer creates a second transaction to finalize the Sarcophagus, including:
+   - The signatures from the archaeologists
+   - Sarcophagus ID (double hash)
+   - Arweave TX ID
+10. Once this second TX is successful, the sarcophagus mummification process is complete and the sarcophagus will be in a "pending" state.
 
-#### Proposed solution updates
+**Re-wrapping**
+To rewrap, the embalmer will create a transaction that will:
+
+1. Specify a new resurrection time.
+2. Pay the archaeologists' their digging fees.
+
+**Unwrapping**
+At the time of resurrection:
+1. Each participating archaeologist may unwrap the sarcophagus with the relevant private key.
+   - The associated public key is the one used to generate the archaeologist's encrypted shard (part of the arweave data bundle).
+   - The smart contract can validate this private key using the public key which has been stored on-chain for this sarcophagus.
+   - The smart contract will pay the archaeologist the bounty for completing their R&R.
+
+**Resurrection**
+If sufficient (`m of n`) archaeologists have participated in the unwrapping, the sarcophagus can be resurrected.
+
+To resurrect the sarcophagus, the recipient will:
+1. Download the arweave data bundle using the arweave TX ID stored on the sarcophagus.
+2. Decrypt the outer layer:
+   - Retrieve the archaeologists' private keys from the sarcophagus
+   - Retrieve the encrypted shards from the arweave bundle
+   - Decrypt the encrypted shards to reveal the private key
+   - Use this private key to reveal the inner layer
+3. Decrypt the inner layer
+   - Use their private key to decrypt the inner layer
+   - Download the fully decrypted payload
+
+**Cancelling, Burying, Cleaning**
+These methods will function _almost_ the same as in v1. The only difference will be any fees or bond that would be 
+distributed to a single archaeologist in v1 will now be distributed to all participating archaeologists (since multiple will be assigned to a given sarcophagus).
+
+**Accusal**
+Accusal will work the same as in v1, with one notable difference: in v1 if an archaeologist was successfully accused, the sarcophagus would enter a "completed" state, 
+meaning the sarcophagus could no longer be unwrapped (since the archaeologist should not receive a bounty since they leaked their secret).
+
+However, in v2:
+- A single archaeologist leaking their secret does not necessarily compromise the entire sarcophagus
+- There are other archaeologists that could still perform their duties (and have not leaked their secret)
+
+As such, unless all participating archaeologists have leaked their secrets, the sarcophagus will remain in a `pending` state and can still be unwrapped at the time of resurrection.
+
+If an archaeologist has been successfully accused, they will not receive their bounty payout if they attempt to `unwrap`. Otherwise they will receive their bounty. 
+
+#### Proposed solution notes
 The new proposed solution adds a few core functionality updates which are described below.
 
 **Multiple Archaeologists per Sarcophagus**
@@ -216,8 +292,8 @@ By implementing the above steps, no single archaeologist will be responsible for
 This will increase the likelihood a sarcophagus can be resurrected once an embalmer has failed to attest.
 
 **Transfer Archaeologist Rights and Responsibilities**
-1. If an archaeologist wants/needs to shut down their service, they should be able to transfer their R&R for any sarcophagi they are assigned to
-1. By allowing these transfers, this will increase the likelihood a sarcophagus can be resurrected even if the original archaeologist cannot fulfill their duties on a sarcophagus
+1. If an archaeologist wants/needs to shut down their service, they should be able to transfer their R&R for any sarcophagi they are assigned to.
+1. By allowing these transfers, this will increase the likelihood a sarcophagus can be resurrected even if the original archaeologist cannot fulfill their duties on a sarcophagus.
 
 Reference this [diagram](transfer-sarcophagus-rights-and-responsibilities.md) to understand mechanisms of this update. 
 
@@ -249,10 +325,11 @@ _Notes_
 
 
 **Web Application**<br/><br/>
-The web application will have upgraded functionality on the front-end:
-1. Ability to select multiple archaeologists
-1. Updated arweave upload functionality to support retries
-1. Various other improvements / bug fixes
+The web application will have updated functionality on the front-end:
+1. Step to generate key pair for inner-layer encryption
+2. Ability to select multiple archaeologists
+3. Updated arweave upload functionality to support retries
+4. Various other improvements
 
 The web application's mummification process can be improved:
 - Instead of using a long vertical form, another option would be to present the form in a linear step-by-step fashion, where only one step is presented to the user.
