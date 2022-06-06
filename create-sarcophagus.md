@@ -63,7 +63,7 @@ sequenceDiagram
 
   Embalmer->>Smart Contracts: Second transaction, which finalizes Sarcophagus creation
 
-  Note right of Embalmer: Includes:<br/>- signatures from archaeologists<br/>- reference to Sarcophagus<br/>- Arweave TX ID
+  Note right of Embalmer: Includes:<br/>- signatures from archaeologists<br/>- reference to Sarcophagus<br/>- Arweave TX ID<br/>- Lock up archaeologists' bond
   
   Smart Contracts->>Smart Contracts: Lock up archaeologists' free bond
 ```
