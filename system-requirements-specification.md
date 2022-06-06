@@ -206,7 +206,7 @@ The new design can be visualized in the diagrams below<br/><br/>
      - `n`: How many total archaeologists will participate in the sarcophagus.
      - `m`: How many archaeologists are necessary to successfully reveal the secret (the private key).
    - The embalmer will use public keys from each participating archaeologist to encrypt the `n` private key shards.
-4. To retrieve the archaeologists' public keys in step 3, as well as other archaeologist communication, the embalmer will use libp2p (see next _Proposed solution notes_ section below for more details).
+4. To retrieve the archaeologists' public keys in step 3, as well as other archaeologist communication, the embalmer will use libp2p (see [Proposed Solution Notes](#Proposed-solution-notes) section below for more details).
 5. After the embalmer has encrypted each private key shard, an arweave data bundle will be prepared, including:
    - The double-encrypted payload
    - The encrypted private key shards
@@ -228,22 +228,29 @@ The new design can be visualized in the diagrams below<br/><br/>
    - The signatures from the archaeologists
    - Sarcophagus ID (double hash)
    - Arweave TX ID
+   - Lock archaeologists' bond
 10. Once this second TX is successful, the sarcophagus mummification process is complete and the sarcophagus will be in a "pending" state.
 
+---
 **Re-wrapping**
+
 To rewrap, the embalmer will create a transaction that will:
 
 1. Specify a new resurrection time.
 2. Pay the archaeologists' their digging fees.
 
+---
 **Unwrapping**
+
 At the time of resurrection:
 1. Each participating archaeologist may unwrap the sarcophagus with the relevant private key.
    - The associated public key is the one used to generate the archaeologist's encrypted shard (part of the arweave data bundle).
    - The smart contract can validate this private key using the public key which has been stored on-chain for this sarcophagus.
    - The smart contract will pay the archaeologist the bounty for completing their R&R.
 
+---
 **Resurrection**
+
 If sufficient (`m of n`) archaeologists have participated in the unwrapping, the sarcophagus can be resurrected.
 
 To resurrect the sarcophagus, the recipient will:
@@ -252,16 +259,44 @@ To resurrect the sarcophagus, the recipient will:
    - Retrieve the archaeologists' private keys from the sarcophagus
    - Retrieve the encrypted shards from the arweave bundle
    - Decrypt the encrypted shards to reveal the private key
-   - Use this private key to reveal the inner layer
+   - Use this private key to decrypt the outer layer (revealing the inner layer)
 3. Decrypt the inner layer
    - Use their private key to decrypt the inner layer
    - Download the fully decrypted payload
 
-**Cancelling, Burying, Cleaning**
-These methods will function _almost_ the same as in v1. The only difference will be any fees or bond that would be 
-distributed to a single archaeologist in v1 will now be distributed to all participating archaeologists (since multiple will be assigned to a given sarcophagus).
+---
+**Cancelling**
 
+Cancelling can be called only: 
+- **after** the _initialize sarcophagus_ transaction has been completed (first tx in create sarcophagus workflow)
+- **before** the _finalize sarcophagus_ transaction has been completed (second tx in create sarcophagus workflow)
+
+Calling this function will distribute locked funds back to the embalmer that were paid during the _initialize_ transaction.
+
+In v1, the archaeologist's bond was locked during the _initialize_ transaction.
+
+In v2, this will occur in the _finalize_ transaction.
+
+Thus, no cursed bond will need to be redistributed to archaeologists during the cancel function in v2.
+
+---
+**Cleaning**
+
+Cleaning is called when a sarcophagus is not unwrapped on time (meaning `m of n` archaeologists did not complete their duties).
+The purpose of this method is to redistribute locked funds and update archaeologist reputation statistics.
+
+- It's possible **some** of the archaeologists responsible for unwrapping have completed their duties, but not enough to reveal the outer layer private key.
+  - In this case, some of the bounty will have been paid out, so only the remaining bounty will be distributed back to the embalmer / `clean` caller
+  - The reputation statistics will also need to take into account the archaeologists that did complete their duties (despite the sarcophagus not being unwrapped)
+
+---
+**Burying**
+
+Burying will function the same as v1. The only difference is that in v2 cursed bonds will need to be distributed to all participating archaeologists.
+
+---
 **Accusal**
+
 Accusal will work the same as in v1, with one notable difference: in v1 if an archaeologist was successfully accused, the sarcophagus would enter a "completed" state, 
 meaning the sarcophagus could no longer be unwrapped (since the archaeologist should not receive a bounty since they leaked their secret).
 
@@ -271,8 +306,9 @@ However, in v2:
 
 As such, unless all participating archaeologists have leaked their secrets, the sarcophagus will remain in a `pending` state and can still be unwrapped at the time of resurrection.
 
-If an archaeologist has been successfully accused, they will not receive their bounty payout if they attempt to `unwrap`. Otherwise they will receive their bounty. 
+If an archaeologist has been successfully accused, they will not receive their bounty payout if they attempt to `unwrap`. Otherwise they will receive their bounty if they perform their R&R. 
 
+---
 #### Proposed solution notes
 The new proposed solution adds a few core functionality updates which are described below.
 
@@ -291,6 +327,7 @@ By implementing the above steps, no single archaeologist will be responsible for
 
 This will increase the likelihood a sarcophagus can be resurrected once an embalmer has failed to attest.
 
+---
 **Transfer Archaeologist Rights and Responsibilities**
 1. If an archaeologist wants/needs to shut down their service, they should be able to transfer their R&R for any sarcophagi they are assigned to.
 1. By allowing these transfers, this will increase the likelihood a sarcophagus can be resurrected even if the original archaeologist cannot fulfill their duties on a sarcophagus.
@@ -299,14 +336,26 @@ Reference this [diagram](transfer-sarcophagus-rights-and-responsibilities.md) to
 
 There will need to be a way for archaeologists to view sarcophagi available for transferring, and a way to signal that they are open to accept transfers.
 
+---
 **Archaeologist Service Upgrades**
 1. The new service will be written in NodeJS, as the JS ecosystem has robust tooling and a large set of developers.
-1. Archaeologists will no longer use http for communication, and will instead be using a peer-to-peer network. [libp2p](https://libp2p.io) (specifically the javascript implementation), is the framework chosen for implementing the p2p network
+2. The setup of the archaeologist service will be streamlined and automated
+    - The process should be simplified to lower the barrier to entry for archaeologists to join the network
+3. Archaeologists will no longer use http for communication, and will instead be using a peer-to-peer network.
+    - The javascript implementation of [libp2p](https://libp2p.io) will be used to implement the p2p network
     - Any communication that happens between embalmers->archaeologists or archaeologists->archaeologists will take place over libp2p.
     - This will allow for simpler setup of the archaeologist service, since no http server or domain will be required
-1. The setup of the archaeologist service will be streamlined and automated
-    - The process should be simplified to lower the barrier to entry for archaeologists to join the network
 
+###### p2p peer discovery:
+
+Some possible modules for p2p discovery can be [viewed here](https://github.com/libp2p/js-libp2p/blob/master/doc/CONFIGURATION.md#peer-discovery). <br>
+As well as: [js-libp2p-pubsub-peer-discovery](https://github.com/libp2p/js-libp2p-pubsub-peer-discovery)
+
+There will need to be bootstrap nodes in the system, which serve as the entrypoint for which archaeologists can learn about network connected peers. 
+
+Each method of peer discovery (DHT, WebRTC, Pub/Sub) has pros/cons. More will be reported on these implementations as the archaeologist service is built.
+
+---
 **Static Archaeologist Fees per Sarcophagus**
 1. Once a Sarcophagus is created, the digging fees and bounty will be "locked" for the duration of the Sarcophagus
     - Previously, an archaeologist could change their fees between re-wrappings. This is not ideal, as the archaeologist could spike their fees between rewrappings, leading to the embalmer not wanting to rewrap
@@ -323,7 +372,7 @@ _Notes_
 1. The owner of this NFT will be the address that is paid for performing archaeologist duties (digging fees & bounty).
 1. This NFT would be transferred during the R&R transfer process.
 
-
+---
 **Web Application**<br/><br/>
 The web application will have updated functionality on the front-end:
 1. Step to generate key pair for inner-layer encryption
@@ -336,7 +385,7 @@ The web application's mummification process can be improved:
 - This would allow the use of larger fonts and more verbose descriptions, leading to an easier-to-understand and smoother UX for embalmers.
 
 In v1, if an arweave upload fails (due to transaction fees being too low or otherwise), the embalmer would have to cancel (or abandon) the sarcophagus.
-In v2, embalmers will be able to retry the arweave upload. This should result in a larger percentage of successful mummifications. 
+In v2, embalmers will be able to retry the arweave upload. This should result in a higher percentage of successful mummifications. 
 
 In v1, sarcophagi for embalmers in the web app are organized based on their state on-chain (pending / completed / cancelled / etc).
 In v2, The web app can potentially take advantage of local storage and allow embalmers to further organize their sarcophagi. For example, they may want to archive any cancelled sarcophagi.
@@ -354,11 +403,12 @@ Below is a list of these participants, and a general outline of test plans for e
     - Once the web application is ready for beta testing, the community will be involved with testing the beta application, which will be launched on an ethereum testnet.
 
 1. Archaeologist (represented by a NodeJS service)
-    - There will be an automated test-suite to test the service
-    - There will be a beta-testing phase where the community can beta-test the service and leave feedback
+    - There will be an automated test-suite to test the service.
+    - There will be a beta-testing phase where the community can beta-test the service and leave feedback.
+    - Peer discovery will require beta-testing to ensure nodes can easily connect to the network and view all available peers.
 
 3. Smart Contracts (deployed on ethereum)
-    - There will be an automated test suite to test the contracts
+    - There will be an automated test suite to test the contracts.
     - There will be a beta-testing phase where the community can beta-test the contracts and leave feedback.
 
 There will be a testing->feedback->testing cycle for the beta testing phase. Feedback/bugs will be collected and then implemented/fixed. Once implementation has been completed, a new round of beta testing will begin.
@@ -382,7 +432,7 @@ Archaeologist operators can also subscribe to github updates on the public archa
 
 ### Rollback Plan
 
-For the web application, any code reversion can be proposed by anyone in the community, and anyone with push permissions to the main web application branch can roll back the code if necessary.
+For the web application, any code reversion can be proposed by anyone in the community, and anyone with push permissions on the `main` web application branch can roll back the code if necessary.
 
 For the archaeologists, the community will be alerted if a rollback of service code is necessary, and archaeologist operators will be responsible for rolling back code on their individual archaeologists.
 
@@ -397,14 +447,14 @@ The smart contracts, web application and archaeologist service will rely on a nu
 
 ### Cost analysis
 
-The main costs for the system are incurred when making blockchain transactions (both on ethereum and arweave). Different participants will pay transaction fees and system fees at different points in a sarcophagus lifecycle.
+The main costs for using the system are incurred when making blockchain transactions (both on ethereum and arweave). Different participants will pay transaction fees and system fees at different points in a sarcophagus lifecycle.
 
 The transaction fees will be variable depending on gas prices at the time that transactions are executed. 
 
 Transaction estimates for different transactions (and different gas prices) will be posted for the community once the smart contracts have been completed. An example of a few transactions that incur costs in the system (this is not comprehensive, view the system diagrams to see all transactions):
 1. Creating a sarcophagus (both embalmer and archaeologist participate)
 1. Rewrapping a sarcophagus (embalmer)
-1. Adding free bond (archaeologist)
+1. Adding / withdrawing free bond (archaeologist)
 
 The hardware for running an archaeologist service should be very low (minimal hardware requirements). For example -- Digital Ocean's $4/month entry-level droplet would be more than enough firepower to run the service.
 
@@ -472,21 +522,46 @@ The order in which pieces of the new system will be completed:
 
 The following items require some research and discussion:
 
-1. Using unencrypted shard hashes / unencrypted shards for sarcophagus creation and unwrapping
+1. Instead of using private/public keys for encrypting/decrypting the outer layer private key shards, instead the smart contracts could use unencrypted shard hashes / unencrypted shards for sarcophagus creation and unwrapping.
+   - Pros:
+       - Reduces complexity by removing need for archaeologist to have separate key pairs for each sarcophagus.
+         - Archaeologists would only need a single public key for all sarcophagi they are responsible for.
+       - Avoid archaeologists being paid their bounty despite potentially uploading an incorrect encrypted shard to arweave.
+         - This would occur if, during a R&R transfer, the archaeologist doing the transfer signs off on incorrect shard data.
 
-- Pros:
-    - Reduces complexity by removing need for archaeologist to have separate key pairs for each sarcophagus 
-    - Avoid archaeologists being paid their bounty despite potentially uploading an incorrect encrypted shard
-    
-- Cons:
-    - Potentially more expensive
+   - Cons:
+       - Potentially more expensive, depending on the size of the unencrypted shard hashes
 
-1. Archaeologist Arweave upload
-    - It needs to be determined how the data bundle gets uploaded to arweave.
+2. Archaeologist Arweave upload
     - Either a single archaeologist could be selected to upload the data bundle, or 5 separate bundles could be uploaded (split the data bundle between the archaeologists)
+      - If multiple archaeologists are selected, then splitting the data results in `n` arweave transactions
+        - This decreases the chance of the mummification process succeeding the first time (without arweave retries), as all arweave TXs must be successful
+      - If a single archaeologist is selected, only one arweave transaction would be necessary. Either:
+        - A UX element would need to be added to sarcophagus creation to handle selection of the arweave-upload archaeologist
+        - Or the web application could automatically elect an archaeologist for this duty. Some options for determining which archaeologist should be responsible: 
+          - lowest fee-per-byte of selected archaeologists
+          - reputation statistics
+          - random
 
-1. Determining M of N archaeologist limit
-    - It needs to be decided what the limits of "N" will be (number of archaeologists on a sarcophagus)
+3. Determining M of N archaeologist limit
+    - It needs to be decided what the limits of "N" will be (max number of archaeologists on a sarcophagus && max number of private key shards)
+      - This will depend on implementation of SSS (for example, a `GF(256)` implementation will have max of 255 shards) 
+      - Transaction costs will most likely rise as the number of archaeologists/shards increases (as this increases the amount of data stored on-chain)
+        - Transaction benchmarks will be run and reported for this
+      
+4. Archaeologist peer discovery
+   - Need to determine which peer discovery module will be used (see: [peer discovery](#p2p-peer-discovery))
+   - Need to determine best approach for bootstrap nodes
+     - The DAO can be responsible for running some of these
+     - Could also put up bounties for community members to run them
+
+5. Archaeologist transfer marketplace
+   - If an archaeologist wants to transfer their R&R for a sarcophagus, how do they find another archaeologist to transfer it to?
+     - Archaeologists need a way to signal they are willing to take jobs
+     - They would also need to signal a threshold for profit (digging fees / bounty).
+       - The receiving archaeologist would need to pay arweave fees
+   - What if they have multiple sarcophagi to transfer?
+     - Is there a way to batch transfer these?
 
 ## End Matter
 
