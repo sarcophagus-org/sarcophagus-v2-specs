@@ -289,6 +289,10 @@ The purpose of this method is to redistribute locked funds and update archaeolog
   - In this case, some of the bounty will have been paid out, so only the remaining bounty will be distributed back to the embalmer / `clean` caller
   - The reputation statistics will also need to take into account the archaeologists that did complete their duties (despite the sarcophagus not being unwrapped)
 
+There is a scenario where `m` archaeologists have been successfully accused. In this case, the sarcophagus would not be able to be unwrapped,
+but there could still be non-accused archaeologists that still have bond cursed for that sarcophagus. 
+It could be argued that these non-accused archaeologists' cursed bond should be returned to them during the cleaning process.
+
 ---
 **Burying**
 
@@ -304,9 +308,26 @@ However, in v2:
 - A single archaeologist leaking their secret does not necessarily compromise the entire sarcophagus
 - There are other archaeologists that could still perform their duties (and have not leaked their secret)
 
-As such, unless all participating archaeologists have leaked their secrets, the sarcophagus will remain in a `pending` state and can still be unwrapped at the time of resurrection.
+As such, unless `m` participating archaeologists have leaked their secrets, the sarcophagus will remain in a `pending` state and can still be unwrapped at the time of resurrection.
 
-If an archaeologist has been successfully accused, they will not receive their bounty payout if they attempt to `unwrap`. Otherwise they will receive their bounty if they perform their R&R. 
+If an archaeologist has been successfully accused, they will not receive their bounty payout if they attempt to `unwrap`. Otherwise, they will receive their bounty if they perform their R&R. 
+
+---
+
+**Transfer R&R**
+1. Original Archaeologist signals intent to transfer to New Archaeologist
+   - New Archaeologist validates sarcophagus is one they are willing to accept 
+2. Original Archaeologist creates TX signalling intent to transfer
+   - The purpose of this is to prevent an accusal of the Original Archaeologist, b/c they will have to share the unencrypted shard
+   - This transaction will need to have a timeout to avoid the accusal being blocked in perpetuity
+3. Original Archaeologist sends their unencrypted shard to the New Archaeologist
+4. New Archaeologist encrypts this shard with their public key and uploads to Arweave
+5. New Archaeologist sends Arweave TX ID to Original Archaeologist
+6. Old Archaeologist validates Arweave data is correct (using New Archaeologist's public key), and sends back signature to New Archaeologist
+7. New Archaeologist creates transaction to complete transfer
+   - Includes arweave TX ID, Old Archaeologist Signature, Public Key
+   - Removes Original Archaeologist from Sarcophagus (remove their public key)
+   - Transfer NFT to New Archaeologist
 
 ---
 #### Proposed solution notes
@@ -357,9 +378,11 @@ Each method of peer discovery (DHT, WebRTC, Pub/Sub) has pros/cons. More will be
 
 ---
 **Static Archaeologist Fees per Sarcophagus**
-1. Once a Sarcophagus is created, the digging fees and bounty will be "locked" for the duration of the Sarcophagus
-    - Previously, an archaeologist could change their fees between re-wrappings. This is not ideal, as the archaeologist could spike their fees between rewrappings, leading to the embalmer not wanting to rewrap
 
+Once a Sarcophagus is created, the digging fees and bounty will be "locked" for the duration of the Sarcophagus
+- Previously, an archaeologist could change their fees between re-wrappings. This is not ideal, as the archaeologist could spike their fees between rewrappings, leading to the embalmer not wanting to rewrap
+
+---
 **Sarcophagus NFT**<br/><br/>
 An archaeologist's R&R for a sarcophagus can be represented by an NFT. This NFT could be viewed/displayed by the archaeologist along with various relevant data, such as:
 - Resurrection time

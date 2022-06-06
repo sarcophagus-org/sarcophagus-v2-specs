@@ -8,6 +8,10 @@ sequenceDiagram
   Original Archaeologist->>Original Archaeologist: decrypt shard
 
   Original Archaeologist->>New Archaeologist: - Decrypted shard data<br/>- Message stating intent to xfer
+  
+  Original Archaeologist->>Smart Contracts: - TX stating intent to transfer
+  
+  Note right of Original Archaeologist: Includes:<br/>- Sarcophagus ID
 
   New Archaeologist-->>Arweave: Read hash of shard from arweave
 
