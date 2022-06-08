@@ -315,6 +315,7 @@ If an archaeologist has been successfully accused, they will not receive their b
 ---
 
 **Transfer R&R**
+
 1. Original Archaeologist signals intent to transfer to New Archaeologist
    - New Archaeologist validates sarcophagus is one they are willing to accept 
 2. Original Archaeologist creates TX signalling intent to transfer
@@ -359,6 +360,7 @@ There will need to be a way for archaeologists to view sarcophagi available for 
 
 ---
 **Archaeologist Service Upgrades**
+
 1. The new service will be written in NodeJS, as the JS ecosystem has robust tooling and a large set of developers.
 2. The setup of the archaeologist service will be streamlined and automated
     - The process should be simplified to lower the barrier to entry for archaeologists to join the network
@@ -366,6 +368,10 @@ There will need to be a way for archaeologists to view sarcophagi available for 
     - The javascript implementation of [libp2p](https://libp2p.io) will be used to implement the p2p network
     - Any communication that happens between embalmers->archaeologists or archaeologists->archaeologists will take place over libp2p.
     - This will allow for simpler setup of the archaeologist service, since no http server or domain will be required
+4. A web application could be added for archaeologists:
+   - Allow archaeologist connect their wallet (with their archaeologist service private key)
+   - View their sarcophagi with associated stats (resurrection time, fees accrued, etc)
+   - View their NFTs / mint NFT for a sarcophagus
 
 ###### p2p peer discovery:
 
@@ -383,7 +389,8 @@ Once a Sarcophagus is created, the digging fees and bounty will be "locked" for 
 - Previously, an archaeologist could change their fees between re-wrappings. This is not ideal, as the archaeologist could spike their fees between rewrappings, leading to the embalmer not wanting to rewrap
 
 ---
-**Sarcophagus NFT**<br/><br/>
+**Sarcophagus NFT**
+
 An archaeologist's R&R for a sarcophagus can be represented by an NFT. This NFT could be viewed/displayed by the archaeologist along with various relevant data, such as:
 - Resurrection time
 - Fees accrued by the archaeologist on the sarcophagus to date
@@ -396,7 +403,8 @@ _Notes_
 1. This NFT would be transferred during the R&R transfer process.
 
 ---
-**Web Application**<br/><br/>
+**Web Application**
+
 The web application will have updated functionality on the front-end:
 1. Step to generate key pair for inner-layer encryption
 2. Ability to select multiple archaeologists
@@ -545,7 +553,7 @@ The order in which pieces of the new system will be completed:
 
 The following items require some research and discussion:
 
-1. Instead of using private/public keys for encrypting/decrypting the outer layer private key shards, instead the smart contracts could use unencrypted shard hashes / unencrypted shards for sarcophagus creation and unwrapping.
+1. Instead of using private/public keys for encrypting/decrypting the outer layer private key shards, the v2 smart contracts will use unencrypted shard hashes / unencrypted shards for sarcophagus creation and unwrapping.
    - Pros:
        - Reduces complexity by removing need for archaeologist to have separate key pairs for each sarcophagus.
          - Archaeologists would only need a single public key for all sarcophagi they are responsible for.
@@ -554,6 +562,8 @@ The following items require some research and discussion:
 
    - Cons:
        - Potentially more expensive, depending on the size of the unencrypted shard hashes
+   
+   - Question: Do pros outweigh cons for this approach, or should we use private keys?
 
 2. Archaeologist Arweave upload
     - Either a single archaeologist could be selected to upload the data bundle, or 5 separate bundles could be uploaded (split the data bundle between the archaeologists)
@@ -577,6 +587,7 @@ The following items require some research and discussion:
    - Need to determine best approach for bootstrap nodes
      - The DAO can be responsible for running some of these
      - Could also put up bounties for community members to run them
+   - All discovery modules will be explored, pros/cons weighed before choosing
 
 5. Archaeologist transfer marketplace
    - If an archaeologist wants to transfer their R&R for a sarcophagus, how do they find another archaeologist to transfer it to?
@@ -585,6 +596,15 @@ The following items require some research and discussion:
        - The receiving archaeologist would need to pay arweave fees
    - What if they have multiple sarcophagi to transfer?
      - Is there a way to batch transfer these?
+
+6. NFT -- required/optional, and who mints?
+   - A few options for minting the NFT:
+     - Embalmer mints all `m` NFTs during the sarcophagus finalization transaction.
+     - Archaeologist mints NFT *after* the sarcophagus is created. This would be optional.
+       - The arch could have a boolean set in the config to auto-mint when a sarcophagus is created that they are assigned to
+       - Could also add potentially add minting capability to the archaeologist GUI
+   - Should archaeologist be allowed to transfer ownership of NFT, or can only contract do this?
+   - Does ownership of the NFT indicate the address of an archaeologist for a sarcophagus, or only which address should be paid for performing R&R?
 
 ## End Matter
 
