@@ -211,13 +211,12 @@ The new design can be visualized in the diagrams below<br/><br/>
    - The double-encrypted payload
    - The encrypted private key shards
      - Each shard will have metadata indicating which archaeologist the shard maps to.
-   - The hash of each unencrypted shard.
 6. The embalmer will create a transaction to initialize the sarcophagus, including:
    - Payment for the sarcophagus (bounty / digging fees).
      - Payment for each archaeologist will be included (as there will be `n` participating archaeologists).
      - The archaeologists will provide their payment info to the embalmer using libp2p.
    - Payment for upcoming arweave TX.
-   - Participating archaeologists' public keys.
+   - The hash of each unencrypted shard.
    - Participating archaeologists' addresses.
 7. Once the TX in previous step is successful, the embalmer will send each archaeologist the TX ID (and potentially other participating archaeologist identifiers).
    - Each archaeologist will confirm that the payment posted is sufficient.
@@ -243,9 +242,10 @@ To rewrap, the embalmer will create a transaction that will:
 **Unwrapping**
 
 At the time of resurrection:
-1. Each participating archaeologist may unwrap the sarcophagus with the relevant private key.
-   - The associated public key is the one used to generate the archaeologist's encrypted shard (part of the arweave data bundle).
-   - The smart contract can validate this private key using the public key which has been stored on-chain for this sarcophagus.
+1. Each participating archaeologist may unwrap the sarcophagus with the relevant unencrypted shard.
+   - The archaeologist will download the encrypted shard from arweave, and decrypt it with their private key
+   - The archaeologist submits this unencrypted shard to the smart contract
+   - The smart contract can validate the unencrypted shard using the unencrypted shard hashes stored on-chain.
    - The smart contract will pay the archaeologist the bounty for completing their R&R.
 
 ---
@@ -256,13 +256,12 @@ If sufficient (`m of n`) archaeologists have participated in the unwrapping, the
 To resurrect the sarcophagus, the recipient will:
 1. Download the arweave data bundle using the arweave TX ID stored on the sarcophagus.
 2. Decrypt the outer layer:
-   - Retrieve the archaeologists' private keys from the sarcophagus
-   - Retrieve the encrypted shards from the arweave bundle
-   - Decrypt the encrypted shards to reveal the private key
+   - Retrieve the unencrypted shards from the sarcophagus
+   - Use these unencrypted shards to reveal the outer layer private key
    - Use this private key to decrypt the outer layer (revealing the inner layer)
 3. Decrypt the inner layer
    - Use their private key to decrypt the inner layer
-   - Download the fully decrypted payload
+   - Download the fully decrypted payload (using arweave bundle)
 
 ---
 **Cancelling**
@@ -282,7 +281,7 @@ Thus, no cursed bond will need to be redistributed to archaeologists during the 
 ---
 **Cleaning**
 
-Cleaning is called when a sarcophagus is not unwrapped on time (meaning `m of n` archaeologists did not complete their duties).
+Cleaning is called when a sarcophagus is not unwrapped on time (meaning `m of n` archaeologists did not complete their duties by the time of `resurrection + resurrection window`).
 The purpose of this method is to redistribute locked funds and update archaeologist reputation statistics.
 
 - It's possible **some** of the archaeologists responsible for unwrapping have completed their duties, but not enough to reveal the outer layer private key.
@@ -296,21 +295,22 @@ It could be argued that these non-accused archaeologists' cursed bond should be 
 ---
 **Burying**
 
-Burying will function the same as v1. The only difference is that in v2 cursed bonds will need to be distributed to all participating archaeologists.
+Burying will function the same as v1. The only difference is that in v2 cursed bonds will need to be un-cursed for all participating archaeologists.
 
 ---
 **Accusal**
 
-Accusal will work the same as in v1, with one notable difference: in v1 if an archaeologist was successfully accused, the sarcophagus would enter a "completed" state, 
-meaning the sarcophagus could no longer be unwrapped (since the archaeologist should not receive a bounty since they leaked their secret).
+To successfully accuse in v2:
+1. `m` unencrypted shards must be submitted to the accusal function on the contracts
+2. The contract will validate these shards against the unencrypted shard hashes
+3. [See diagram](accuse-archaeologist.md) for how payments are distributed on successful accusal.
+4. The sarcophagus enters a "done" state (cannot be unwrapped)
 
-However, in v2:
-- A single archaeologist leaking their secret does not necessarily compromise the entire sarcophagus
-- There are other archaeologists that could still perform their duties (and have not leaked their secret)
+Implementing it so that the entire private key secret is compromised (instead of allowing single-archaeologist accusals) ensures that archaeologists that still obtain
+unencrypted shards after transferring their R&R can't successfully accuse the archaeologist the R&R are transferred to,
+as they only contain one of the `m` secrets necessary to accuse.
 
-As such, unless `m` participating archaeologists have leaked their secrets, the sarcophagus will remain in a `pending` state and can still be unwrapped at the time of resurrection.
-
-If an archaeologist has been successfully accused, they will not receive their bounty payout if they attempt to `unwrap`. Otherwise, they will receive their bounty if they perform their R&R. 
+This also allows the contract to distribute funds back to non-accused archaeologists.
 
 ---
 
@@ -599,7 +599,7 @@ The following items require some research and discussion:
 
 6. NFT -- required/optional, and who mints?
    - A few options for minting the NFT:
-     - Embalmer mints all `m` NFTs during the sarcophagus finalization transaction.
+     - Embalmer mints all `n` NFTs during the sarcophagus finalization transaction.
      - Archaeologist mints NFT *after* the sarcophagus is created. This would be optional.
        - The arch could have a boolean set in the config to auto-mint when a sarcophagus is created that they are assigned to
        - Could also add potentially add minting capability to the archaeologist GUI
