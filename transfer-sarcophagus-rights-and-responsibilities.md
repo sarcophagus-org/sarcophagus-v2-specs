@@ -31,7 +31,7 @@ sequenceDiagram
 
   New Archaeologist->>Smart Contracts: Finalization transaction
 
-  Note right of New Archaeologist: Includes:<br/>- Arweave TX ID<br/>- Signature from Original Archaeologist
+  Note right of New Archaeologist: Includes:<br/>- Arweave TX ID<br/>- Signature from Original Archaeologist<br/>- Release Original Archaeologist's bond<br/>- Lock up New Archaeologist's bond
 
   Smart Contracts->>Smart Contracts: Verify and Transfer
 

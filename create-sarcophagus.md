@@ -29,11 +29,11 @@ sequenceDiagram
 
   Embalmer->>Embalmer: Encrypt inner encrypted payload with public key ("outer encrypted payload")
 
-  Embalmer->>Embalmer: Choose set of `m` archaeologists to participate in new sarcophagus
+  Embalmer->>Embalmer: Choose set of `n` archaeologists to participate in new sarcophagus
   
   Note right of Embalmer: Based on:<br/>- archaeologist rates<br/>- size of bundle<br />- archaeologist metrics
 
-  Embalmer->>Embalmer: Use SSSS to create `n` shards of private key
+  Embalmer->>Embalmer: Use SSS to create `n` shards of private key
 
   Embalmer->>Embalmer: Hash each shard
 
@@ -41,11 +41,11 @@ sequenceDiagram
 
   Embalmer->>Embalmer: Create Arweave data bundle
 
-  Note right of Embalmer: Includes:<br/>- outer encrypted payload<br/>- encrypted private key shards<br/>- hashes of each shard
+  Note right of Embalmer: Includes:<br/>- outer encrypted payload<br/>- encrypted private key shards
 
   Embalmer->>Smart Contracts: Make first transaction
 
-  Note right of Embalmer:- Creates unique identifier for sarcophagus<br/>- Puts up payment signal for not-yet-completed Arweave transaction<br/>- Puts up payment for first round of wrapping<br/>- Includes identifiers for all archaeologists<br/>- Includes public keys used to encrypt each shard
+  Note right of Embalmer:- Creates unique identifier for sarcophagus<br/>- Puts up payment signal for not-yet-completed Arweave transaction<br/>- Puts up payment for first round of wrapping<br/>- Includes identifiers for all archaeologists<br/>- Includes unencrypted shard hashes<br/>- Includes transfer allowed indicator
 
   par Embalmer <-> Archaeologists
     Embalmer->>Archaeologists: Inform Archaeologists of recent transaction
@@ -63,7 +63,11 @@ sequenceDiagram
 
   Embalmer->>Smart Contracts: Second transaction, which finalizes Sarcophagus creation
 
-  Note right of Embalmer: Includes:<br/>- signatures from archaeologists<br/>- reference to Sarcophagus<br/>- Arweave TX ID<br/>- Lock up archaeologists' bond
+  Note right of Embalmer: Includes:<br/>- signatures from archaeologists<br/>- reference to Sarcophagus<br/>- Arweave TX ID
+  
+  Smart Contracts->>Smart Contracts: Validate archaeologist signatures
   
   Smart Contracts->>Smart Contracts: Lock up archaeologists' free bond
+  
+  Smart Contracts->>Archaeologists: Pay archaeologist(s) responsible for <br/> Arweave upload their fee
 ```
