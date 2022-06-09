@@ -382,6 +382,19 @@ There will need to be bootstrap nodes in the system, which serve as the entrypoi
 
 Each method of peer discovery (DHT, WebRTC, Pub/Sub) has pros/cons. More will be reported on these implementations as the archaeologist service is built.
 
+###### transport
+The archaeologist will be a nodeJS based service, and the web application will be browser based.
+
+Thus, the system will need to support both:
+Browser -> NodeJS connection
+NodeJS -> NodeJS connection
+
+It does *not* need to support Browser -> Browser connections.
+
+The [webrtc-direct](https://github.com/libp2p/js-libp2p-webrtc-direct) transport handles the necessary connection types.
+
+The speed of connection and data transfer will need to be tested.
+
 ---
 **Static Archaeologist Fees per Sarcophagus**
 
