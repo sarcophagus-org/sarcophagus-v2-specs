@@ -619,6 +619,10 @@ The following items require some research and discussion:
    - Should archaeologist be allowed to transfer ownership of NFT, or can only contract do this?
    - Does ownership of the NFT indicate the address of an archaeologist for a sarcophagus, or only which address should be paid for performing R&R?
 
+7. Resurrection Window duration
+   - In v1, the resurrection window is 30 minutes. Should we keep this the same?
+   - There is argument that window could be longer (1-2 days) to allow for archaeologists to rally/communicate with any archaeologists that haven't completed their duties.
+
 ## End Matter
 
 ### References
